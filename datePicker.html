@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>Document</title>
+  <style>
+    body{
+      margin:0;
+    }
+    ul,li{
+      margin:0;padding:0;
+      list-style: none;
+    }
+    .clear-fix:after{
+      display: block;
+      content:'';
+      clear:both;
+    }
+    .datePicker{
+      float:left;
+      width:280px;
+      position: relative;
+      width:300px;
+      height:40px;
+      border:1px solid #000;
+    }
+    .datePicker .main-datepicker{
+      position: absolute;
+      top:42px;
+      left:0;
+      border: 1px solid #e5e9f2;
+    }
+    .week-list{
+      width:280px;
+      border-bottom: 1px solid #e5e9f2;
+    }
+    .week-list div{
+      float:left;
+      width:40px;
+      height:40px;
+      line-height: 40px;
+      text-align: center;
+    }
+    .date-list{
+      width:280px;
+    }
+    .date-list li{
+      float:left;
+      width:40px;
+      height:40px;
+      text-align: center;
+      line-height: 40px;
+      cursor:pointer;
+      border-radius: 50%;
+    }
+    .date-list li.gray{
+      color:gray;
+    }
+    .date-list li.choosed{
+      width:38px;
+      height:38px;
+      color:#26a3ff;
+      border:1px solid #26a3ff;
+      background:#fff;
+    }
+    .date-list li.today{
+      color:#fff;
+      background-color: #26a3ff;
+    }
+    .datePickerHead{
+      height:40px;
+    }
+    .month-date{
+      float:left;
+      height:40px;
+      line-height: 40px;
+      margin-left: 10px;
+      font-size:18px;
+      cursor:pointer;
+    }
+    .tab-box{
+      float:right;
+    }
+    .tab-box div{
+      float:left;
+      width:40px;
+      height:40px;
+      line-height: 40px;
+      font-size: 20px;
+      cursor:pointer;
+      text-align: center;
+      user-select: none;
+    }
+    .clickhanler{
+      display: block;
+      width:40px;
+      height:40px;
+      float:right;
+      background-color: red;
+    }
+    .datePickerHead {
+
+    }
+  </style>
+</head>
+<body>
+  <div class="datePicker" id="datePicker"></div>
+    <script>
+      class DatePicker{
+        constructor(dom){
+          this.dom=dom;
+          this.totalDate=null;
+          this.text=null;
+          this.mainDatePicker=null;
+          this.dateUl=null;
+          this.clickHanlderSpan=null;
+          this.date=new Date();
+          this._domController();
+        }
+        _domController(){
+          this.mainDatePicker=document.createElement('div');
+          this.text=document.createElement('input');
+          this.clickHanlderSpan=document.createElement('span')
+          this.clickHanlderSpan.className='clickhanler'
+          this.mainDatePicker.className='main-datepicker';
+          this.dateUl=document.createElement(`ul`);
+          this.dateUl.className='date-list clear-fix';
+          this.mainDatePicker.appendChild(this._setDateHead())
+          this.mainDatePicker.appendChild(this._setWeek())
+          this.mainDatePicker.appendChild(this._createDate(this.date))
+          this.dom.appendChild(this.text)
+          this.dom.appendChild(this.clickHanlderSpan)
+          this.dom.appendChild(this.mainDatePicker)
+          this.clickHanlderSpan.onclick=()=>{
+            this.mainDatePicker.style.display='block'
+          };
+        }
+        _setDateHead(){
+          const DateHead=document.createElement('div');
+          this.totalDate=document.createElement('div');
+          const tabBox=document.createElement('div')
+          const prev=document.createElement('div')
+          const next=document.createElement('div')
+          prev.onclick=()=>{
+            this.totalDate.innerHTML=`${this.date.getFullYear()}/${this._addZero(this.date.getMonth()+1)}`;
+            this._createDate(this.date);
+          };
+          next.onclick=()=>{
+          this.date.setMonth(this.date.getMonth()+2)
+          this.totalDate.innerHTML=`${this.date.getFullYear()}/${this._addZero(this.date.getMonth()+1)}`;
+          this._createDate(this.date);
+          }
+          tabBox.className='tab-box'
+          prev.className='prev'
+          next.className='next'
+          prev.innerHTML='<'
+          next.innerHTML='>'
+          tabBox.appendChild(prev)
+          tabBox.appendChild(next)
+          this.totalDate.innerHTML=`${this.date.getFullYear()}/${this._addZero(this.date.getMonth()+1)}`;
+          DateHead.className='datePickerHead clear-fix';
+          this.totalDate.className='month-date';
+          DateHead.appendChild(this.totalDate);
+          DateHead.appendChild(tabBox);
+          return DateHead;
+        }
+        _setWeek(){
+          const dateWeek=document.createElement(`div`);
+          dateWeek.className="week-list clear-fix"
+          const weekArr=['一','二','三','四','五','六','日'];
+          for(let i=0;i<7;i++){
+            const weekLi=document.createElement(`div`);
+            weekLi.innerHTML=weekArr[i];
+            dateWeek.appendChild(weekLi)
+          }
+          return dateWeek;
+        }
+        _createDate(date){
+          this.dateUl.innerHTML=''
+          const today=new Date();
+          date.setDate(1);
+          let firstDay=date.getDay();
+          date.setMonth(date.getMonth()+1)
+          date.setDate(0);
+          const maxMonthDate=date.getDate();
+          date.setDate(0);
+          const prevMonthDate=date.getDate()
+          if(firstDay==0){
+            firstDay=7;
+          }
+          console.log(firstDay)
+          for(let i=0;i<42;i++){
+            const dateLi=document.createElement(`li`)
+            if(i>=firstDay-1 && i + 1 < maxMonthDate + firstDay){
+              // 本月
+              const dateStr=i-firstDay+2
+              dateLi.innerHTML= dateStr;
+              if(parseInt(dateStr)==today.getDate() && today.getMonth()==this.date.getMonth()+1){
+                dateLi.classList.add('today');
+              }
+              dateLi.onclick=()=>{
+                var li=dateLi.parentNode.children;
+                for(var j=0;j<li.length;j++){
+                  li[j].classList.remove('choosed')
+                }
+                dateLi.classList.add('choosed')
+                this.text.value=`${this.totalDate.innerHTML}/${this._addZero(i-firstDay+2)}`;
+                this.mainDatePicker.style.display='none';
+              }
+            }else if(i+2 > maxMonthDate + firstDay){
+              // 下月
+              dateLi.innerHTML=i-(maxMonthDate+firstDay)+2;
+              dateLi.className='gray';
+            }else{
+              // 上月
+              dateLi.innerHTML=prevMonthDate-(firstDay-i-2);
+              dateLi.className='gray';
+            }
+            this.dateUl.appendChild(dateLi)
+          }
+          return this.dateUl;
+        }
+        _addZero(n){
+          return n > 9 ? '' + n : '0' + n ;
+        }
+      }
+      new DatePicker(document.querySelector("#datePicker"));
+    </script>
+</body>
+</html>
